@@ -1,21 +1,26 @@
 #!/home/605/sincomb/anaconda3/bin/python3
-""" Matrix Multiplication Comparison
+""" Matrix Multiplication Comparison!
+This program will auto generate the columns for you so you just need to
+input the matrix dimensions M N O for matrixes (MxN) & (NxO). Safe to assume the
+N will be the same since matrix multipliation isn't possible without it.
 
 Usage:
     ./project.py  (-h | --help)
     ./project.py  [--CUDA] M N O
 
 Arguments:
-    M
-    N
-    O
+    M                            Matrix A row count
+    N                            Matrix A column count & matrix B row count
+    O                            Matrix B column count
 
 Options:
-    -h, --help                      Prints out usage examples.
-    -c, --CUDA                      Tells algo to use CUDA [default: False]
+    -h, --help                   Prints out usage examples.
+    -c, --CUDA                   Tells algo to use CUDA [default: False]
 
 Terminal Examples:
-    ./project.py -c 3 3 3
+    ./project.py -c 3 3 3        Square matrix multipliation with GPU
+    ./project.py 3 3 3           Square matrix multipliation with only CPU
+    ./project.py 4 3 7           Rectangular matrix multipliation
 """
 import math # Built-in Math library
 from time import time # Built-in time keeping library
@@ -32,6 +37,9 @@ except:
 
 
 class MatrixMultiplication:
+
+    # Inspired by :)
+    # https://stackoverflow.com/questions/13896560/multiply-rectangular-matrices-in-cuda
     src_module = """
         __global__ void dot(int width, int height, const float *A, const float *B, float *C){
 
@@ -64,28 +72,31 @@ class MatrixMultiplication:
             return self.cpu_dot()
 
     def cpu_dot(self):
-        pass
+        # split row iterations by threads; use hw1
+        # ijk
 
     def gpu_dot(self):
 
+        # Dimensions of the resulting matrix!
         width = self.matrixB.shape[1] # O
         height = self.matrixA.shape[0] # M
 
-        self.matrixA = self.matrixA.astype(np.float32)
-        self.matrixB = self.matrixB.astype(np.float32)
-
         # Create resulting dot matrix of (M x O) from (M x N)*(N * O)
         self.matrixC = np.empty([height, width])
+
+        # Best default format type for PYCUDA with GPU
+        self.matrixA = self.matrixA.astype(np.float32)
+        self.matrixB = self.matrixB.astype(np.float32)
         self.matrixC = self.matrixC.astype(np.float32)
 
         # Allocate GPU memory for matrixes
-        a_gpu = cuda.mem_alloc(self.matrixA.nbytes)
-        b_gpu = cuda.mem_alloc(self.matrixB.nbytes)
-        c_gpu = cuda.mem_alloc(self.matrixC.nbytes)
+        matrixA_mem_alloc = cuda.mem_alloc(self.matrixA.nbytes)
+        matrixB_mem_alloc = cuda.mem_alloc(self.matrixB.nbytes)
+        matrixC_mem_alloc = cuda.mem_alloc(self.matrixC.nbytes)
 
         # Copy matrixes to allocated GPU memory
-        cuda.memcpy_htod(a_gpu, self.matrixA)
-        cuda.memcpy_htod(b_gpu, self.matrixB)
+        cuda.memcpy_htod(matrixA_mem_alloc, self.matrixA)
+        cuda.memcpy_htod(matrixB_mem_alloc, self.matrixB)
 
         print(self.matrixA)
         print(self.matrixB)
@@ -111,15 +122,15 @@ class MatrixMultiplication:
         dot_product(
             np.int32(width),
             np.int32(height),
-            a_gpu,
-            b_gpu,
-            c_gpu,
+            matrixA_mem_alloc,
+            matrixB_mem_alloc,
+            matrixB_mem_alloc,
             block=(self.dim_block,self.dim_block,1),
             grid=grid
         );
 
         # Copies completed dot product from GPU memory to normal memory
-        cuda.memcpy_dtoh(self.matrixC, c_gpu)
+        cuda.memcpy_dtoh(self.matrixC, matrixC_mem_alloc)
 
         return self.matrixC
 
@@ -148,7 +159,7 @@ def main():
 
     print(mm_dot)
     print(numpy_dot)
-    print(mm_dot == numpy_dot)
+    print(np.around(mm_dot, decimals=5) == np.around(numpy_dot, decimals=5))
 
 if __name__ == '__main__':
     main()
