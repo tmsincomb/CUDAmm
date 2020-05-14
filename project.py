@@ -108,7 +108,6 @@ class MatrixMultiplication:
         print(self.matrixA)
         print(self.matrixB)
         print(self.matrixC)
-        print(a_gpu)
 
         # Dynamic grid for none squared matrix multiplication
         dim_grid_x = math.ceil(width / self.dim_block)
@@ -118,10 +117,10 @@ class MatrixMultiplication:
         print(dim_grid_y)
 
         # set grid size
-        if (width % self.dim_block != 0) and (height % self.dim_block != 0):
-            grid=(dim_grid_x+1, dim_grid_y+1, 1)
-        else:
-            grid=(dim_grid_x, dim_grid_y, 1)
+        # if (width % self.dim_block != 0) and (height % self.dim_block != 0):
+        #     grid=(dim_grid_x+1, dim_grid_y+1, 1)
+        # else:
+        grid=(dim_grid_x, dim_grid_y, 1)
 
         # Call specific function from CUDA kernel
         dot_product = self.module.get_function("dot");
