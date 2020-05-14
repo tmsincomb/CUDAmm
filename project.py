@@ -95,7 +95,7 @@ class MatrixMultiplication:
             grid=(dim_grid_x, dim_grid_y, 1)
 
         # Call specific function from CUDA kernel
-        dot_product = mod.get_function("dot");
+        dot_product = self.module.get_function("dot");
 
         # Dot product of matrixA with matrixB using GPU
         dot_product(
