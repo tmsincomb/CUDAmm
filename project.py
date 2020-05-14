@@ -50,7 +50,7 @@ class MatrixMultiplication:
     """
 
     def __init__(self, matrixA, matrixB, use_cuda=False, dim_block=16):
-        self.module = SourceModule(src_module)
+        self.module = SourceModule(self.src_module)
         self.matrixA = matrixA
         self.matrixB = matrixB
         self.use_cuda = use_cuda
