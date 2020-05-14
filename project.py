@@ -32,42 +32,21 @@ except:
 
 
 class MatrixMultiplication:
-    # src_module = """
-    #     __global__ void dot(int width, int height, const float *A, const float *B, float *C){
-    #
-    #         unsigned int row = threadIdx.y + blockIdx.y * blockDim.y;
-    #         unsigned int col = threadIdx.x + blockIdx.x * blockDim.x;
-    #         float tmp_value = 0.0;
-    #
-    #         // Makes sure we don't spill over grid parameters
-    #         if ((row > height) || (col > width)) return;
-    #
-    #         for(int i=0; i<width; ++i)
-    #             tmp_value += A[row * width + i] * B[width * i + col];
-    #
-    #         C[row*width + col] = tmp_value;
-    #     }
-    # """
+    src_module = """
+        __global__ void dot(int width, int height, const float *A, const float *B, float *C){
 
-    src_module = """__global__ void dot(int n, const float *A, const float *B, float *C){
+            unsigned int row = threadIdx.y + blockIdx.y * blockDim.y;
+            unsigned int col = threadIdx.x + blockIdx.x * blockDim.x;
+            float tmp_value = 0.0;
 
-      int tx = threadIdx.x;
-      int ty = threadIdx.y;
+            // Makes sure we don't spill over grid parameters
+            if ((row > height) || (col > width)) return;
 
-      int bx = blockIdx.x;
-      int by = blockIdx.y;
+            for(int i=0; i<width; ++i)
+                tmp_value += A[row * width + i] * B[width * i + col];
 
-      int row = by*blockDim.y + ty;
-      int col = bx*blockDim.x + tx;
-
-      if(row < n && col < n){
-        float val = 0.0;
-        for(int i=0; i<n; ++i){
-          val += A[row*n + i]*B[n*i + col];
+            C[row*width + col] = tmp_value;
         }
-        C[row*n + col] = val;
-      }
-    }
     """
 
     def __init__(self, matrixA, matrixB, use_cuda=False, dim_block=16):
@@ -130,7 +109,7 @@ class MatrixMultiplication:
 
         # Dot product of matrixA with matrixB using GPU
         dot_product(
-            # np.int32(width),
+            np.int32(width),
             np.int32(height),
             a_gpu,
             b_gpu,
