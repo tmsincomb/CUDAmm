@@ -45,7 +45,7 @@ class MatrixMultiplication:
             for(int i=0; i<width; ++i)
                 tmp_value += A[row * width + i] * B[width * i + col];
 
-            C[row*n + col] = tmp_value;
+            C[row*width + col] = tmp_value;
         }
     """
 
