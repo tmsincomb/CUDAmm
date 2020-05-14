@@ -109,7 +109,7 @@ class MatrixMultiplication:
         );
 
         # Copies completed dot product from GPU memory to normal memory
-        cuda.memcpy_dtoh(self.matrixC, matrixC)
+        cuda.memcpy_dtoh(self.matrixC, c_gpu)
 
         return self.matrixC
 
