@@ -84,9 +84,17 @@ class MatrixMultiplication:
         cuda.memcpy_htod(a_gpu, self.matrixA)
         cuda.memcpy_htod(b_gpu, self.matrixB)
 
+        print(self.matrixA)
+        print(self.matrixB)
+        print(self.matrixC)
+        print(a_gpu)
+
         # Dynamic grid for none squared matrix multiplication
         dim_grid_x = math.ceil(width / self.dim_block)
         dim_grid_y = math.ceil(height / self.dim_block)
+
+        print(dim_grid_x)
+        print(dim_grid_y)
 
         # set grid size
         if (width % self.dim_block != 0) and (height % self.dim_block != 0):
