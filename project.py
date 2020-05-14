@@ -152,7 +152,7 @@ def main():
 
     start = time()
     mm_dot = mm.dot
-    elapsed_time = time() - start
+    gpu_dot_elapsed_time = time() - start
 
     # Numpy built-in matrix multiplication :: Sanity check
     numpy_dot = matrixA.dot(matrixB)
