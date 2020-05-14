@@ -92,6 +92,9 @@ class MatrixMultiplication:
         width = self.matrixB.shape[1] # O
         height = self.matrixA.shape[0] # M
 
+        self.matrixA = self.matrixA.astype(np.float32)
+        self.matrixB = self.matrixB.astype(np.float32)
+
         # Create resulting dot matrix of (M x O) from (M x N)*(N * O)
         self.matrixC = np.empty([height, width])
         self.matrixC = self.matrixC.astype(np.float32)
