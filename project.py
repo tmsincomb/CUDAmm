@@ -42,8 +42,8 @@ class MatrixMultiplication:
             // Makes sure we don't spill over grid parameters
             if ((row > height) || (col > width)) return;
 
-            for(int i=0; i<width; ++i)
-                tmp_value += A[row * width + i] * B[width * i + col];
+            for(int i=0; i<height; ++i)
+                tmp_value += A[row * height + i] * B[width * i + col];
 
             C[row*width + col] = tmp_value;
         }
@@ -98,8 +98,9 @@ class MatrixMultiplication:
         print(dim_grid_x)
         print(dim_grid_y)
 
+        # Make sure grid is usable
         if (width % self.dim_block != 0) and (height % self.dim_block != 0):
-            grid=(dim_grid_x+1, dim_grid_y+1, 1)
+            grid=(dim_grid_x+1, dim_grid_y+1, 1) # if matrix is smaller than block size
         else:
             grid=(dim_grid_x, dim_grid_y, 1)
 
