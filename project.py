@@ -100,7 +100,7 @@ class MatrixMultiplication:
         # Dot product of matrixA with matrixB using GPU
         dot_product(
             np.int32(width),
-            np.int32(height)
+            np.int32(height),
             a_gpu,
             b_gpu,
             c_gpu,
