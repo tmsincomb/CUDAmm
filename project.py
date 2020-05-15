@@ -119,7 +119,8 @@ class MatrixMultiplication:
         # pool.join()
         return matrixC
 
-    def gpu_dot(self, dim_block:int=16):
+    @property
+    def gpu_dot(self):#, dim_block:int=16):
         # Initialize gpu CUDA kernels
         self.module = SourceModule(self.src_module)
 
@@ -147,27 +148,33 @@ class MatrixMultiplication:
         # print(self.matrixA)
         # print(self.matrixB)
         # print(self.matrixC)
-
-        # Dynamic grid for none squared matrix multiplication
-        dim_grid_x = math.ceil((width-1) / dim_block)
-        dim_grid_y = math.ceil((height-1) / dim_block)
+        dim_block_x = height
+        dim_block_y = width
+        dim_grid_x = 1
+        dim_grid_y = 1
+        if ((dim_block_x * dim_block_y) > 512):
+            # Dynamic grid for none squared matrix multiplication
+            dim_block_x = 512
+            dim_block_y = 512
+            dim_grid_x = math.ceil((width) / dim_block_x)
+            dim_grid_y = math.ceil((height) / dim_block_y)
 
         # print(dim_grid_x)
         # print(dim_grid_y)
 
         # Make sure grid is usable
         # if (width % dim_block != 0) and (height % dim_block != 0):
-        grid=(dim_grid_x+1, dim_grid_y+1, 1) # if matrix is smaller than block size
+        # grid=(dim_grid_x+1, dim_grid_y+1, 1) # if matrix is smaller than block size
         # else:
         # grid=(dim_grid_x, dim_grid_y, 1)
 
         # Call specific function from CUDA kernel
         dot_product = self.module.get_function("dot");
 
-        print(dim_grid_x*dim_grid_y)
-        print(dim_block**2)
-        print(dim_grid_x*dim_grid_y*(dim_block**2))
-        print(height*width)
+        # print(dim_grid_x*dim_grid_y)
+        # print(dim_block**2)
+        # print(dim_grid_x*dim_grid_y*(dim_block**2))
+        # print(height*width)
 
         # Dot product of matrixA with matrixB using GPU
         dot_product(
@@ -177,9 +184,8 @@ class MatrixMultiplication:
             matrixA_mem_alloc,
             matrixB_mem_alloc,
             matrixC_mem_alloc,
-            # block=(dim_block,dim_block,1),
-            block=(height, width, 1)
-            # grid=grid
+            block=(dim_block_x,dim_block_y,1),
+            grid=(dim_grid_x, dim_grid_y)
         );
 
         # Copies completed dot product from GPU memory to normal memory
@@ -209,7 +215,7 @@ def main():
     ### GPU ###
     if dim_block:
         print('GPU!')
-        dot = mm.gpu_dot(dim_block=dim_block) # GPU multithreaded matrix multipliation
+        dot = mm.gpu_dot # GPU multithreaded matrix multipliation
     ### CPU ###
     elif threads:
         print('THREAD!')
