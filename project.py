@@ -171,8 +171,8 @@ class MatrixMultiplication:
         # print(self.matrixC)
 
         # Dynamic grid for none squared matrix multiplication
-        dim_grid_x = math.ceil(width / dim_block)
-        dim_grid_y = math.ceil(height / dim_block)
+        dim_grid_x = math.ceil((width-1) / dim_block)
+        dim_grid_y = math.ceil((height-1) / dim_block)
 
         # print(dim_grid_x)
         # print(dim_grid_y)
