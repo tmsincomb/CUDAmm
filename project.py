@@ -55,8 +55,8 @@ class MatrixMultiplication:
             // Makes sure we don't spill over grid parameters
             if ((row > M) || (col > O)) return;
 
-            for(int i=0; i < M; ++i)
-                tmp_value += A[row * M + i] * B[O * i + col];
+            for(int i=0; i < N; ++i)
+                tmp_value += A[row * N + i] * B[O * i + col];
 
             C[row * O + col] = tmp_value;
         }
