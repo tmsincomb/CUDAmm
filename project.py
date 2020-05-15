@@ -55,9 +55,9 @@ class MatrixMultiplication:
             // Makes sure we don't spill over grid parameters
             if ((row > M) || (col > O)) return;
 
-            __syncthreads();
             for(int i=0; i < N; ++i)
                 tmp_value += A[row * N + i] * B[O * i + col];
+
             __syncthreads();
 
             C[row * O + col] = tmp_value;
@@ -162,7 +162,7 @@ class MatrixMultiplication:
         #     dim_grid_x = math.ceil((width) / dim_block_x)
         #     dim_grid_y = math.ceil((height) / dim_block_y)
 
-        dim_block = 32
+        dim_block = 16
 
         dim_grid_x = math.ceil((width) / dim_block)
         dim_grid_y = math.ceil((height) / dim_block)
