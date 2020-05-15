@@ -152,10 +152,10 @@ class MatrixMultiplication:
         dim_block_y = width
         dim_grid_x = 1
         dim_grid_y = 1
-        if ((dim_block_x * dim_block_y) > 512):
+        if ((dim_block_x * dim_block_y) > 1024):
             # Dynamic grid for none squared matrix multiplication
-            dim_block_x = 512
-            dim_block_y = 512
+            dim_block_x = 32
+            dim_block_y = 32
             dim_grid_x = math.ceil((width) / dim_block_x)
             dim_grid_y = math.ceil((height) / dim_block_y)
 
