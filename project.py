@@ -63,7 +63,7 @@ class MatrixMultiplication:
     # """
 
     src_module = """
-    __global__ void matmul(int n, const float *A, const float *B, float *C){
+    __global__ void dot(int n, const float *A, const float *B, float *C){
 
       int tx = threadIdx.x;
       int ty = threadIdx.y;
