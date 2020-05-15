@@ -45,22 +45,43 @@ class MatrixMultiplication:
 
     # Inspired by :)
     # https://stackoverflow.com/questions/13896560/multiply-rectangular-matrices-in-cuda
+    # src_module = """
+    #     __global__ void dot(int M, int N, int O, const float *A, const float *B, float *C){
+    #
+    #         unsigned int row = threadIdx.y + blockIdx.y * blockDim.y;
+    #         unsigned int col = threadIdx.x + blockIdx.x * blockDim.x;
+    #         float tmp_value = 0;
+    #
+    #         // Makes sure we don't spill over grid parameters
+    #         if ((row > height) || (col > width)) return;
+    #
+    #         for(int i=0; i < height; ++i)
+    #             tmp_value += A[row * height + i] * B[width * i + col];
+    #
+    #         C[row * width + col] = tmp_value;
+    #     }
+    # """
+
     src_module = """
-        __global__ void dot(int width, int height, const float *A, const float *B, float *C){
+    __global__ void matmul(int n, const float *A, const float *B, float *C){
 
-            unsigned int row = threadIdx.y + blockIdx.y * blockDim.y;
-            unsigned int col = threadIdx.x + blockIdx.x * blockDim.x;
-            float tmp_value = 0.0;
+      int tx = threadIdx.x;
+      int ty = threadIdx.y;
 
-            // Makes sure we don't spill over grid parameters
-            if ((row > height) || (col > width)) return;
+      int bx = blockIdx.x;
+      int by = blockIdx.y;
 
-            for(int i=0; i < height; ++i)
-                tmp_value += A[row * height + i] * B[width * i + col];
+      int row = by*blockDim.y + ty;
+      int col = bx*blockDim.x + tx;
 
-            C[row * width + col] = tmp_value;
+      if(row < n && col < n){
+        float val = 0.0;
+        for(int i=0; i<n; ++i){
+          val += A[row*n + i]*B[n*i + col];
         }
-    """
+        C[row*n + col] = val;
+      }
+    }"""
 
     def __init__(self, matrixA, matrixB):
         self.matrixA = matrixA
@@ -125,11 +146,11 @@ class MatrixMultiplication:
         self.module = SourceModule(self.src_module)
 
         # Dimensions of the resulting matrix!
+        height, N = self.matrixA.shape # M, N
         width = self.matrixB.shape[1] # O
-        height = self.matrixA.shape[0] # M
 
         # Create resulting dot matrix of (M x O) from (M x N)*(N * O)
-        self.matrixC = np.empty([height, width])
+        self.matrixC = np.zeros([height, width])
 
         # Best default format type for PYCUDA with GPU
         self.matrixA = self.matrixA.astype(np.float32)
@@ -167,8 +188,9 @@ class MatrixMultiplication:
 
         # Dot product of matrixA with matrixB using GPU
         dot_product(
-            np.int32(width),
-            np.int32(height),
+            # np.int32(height),
+            np.int32(N),
+            # np.int32(width),
             matrixA_mem_alloc,
             matrixB_mem_alloc,
             matrixC_mem_alloc,
@@ -215,11 +237,15 @@ def main():
 
     # Numpy built-in matrix multiplication :: Sanity check
     numpy_dot = matrixA.dot(matrixB)
+    if dim_block:
+        numpy_dot = numpy_dot.astype(np.float32)
 
-    # print(dot)
-    # print(numpy_dot)
-    # print(np.around(dot, decimals=5) == np.around(numpy_dot.astype(np.float32), decimals=5))
-    print(np.array_equal(np.around(dot, decimals=5), np.around(numpy_dot.astype(np.float32), decimals=5)))
+    print(dot)
+    print(numpy_dot)
+    print(np.around(dot, decimals=5) == np.around(numpy_dot, decimals=5))
+    print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2)))
     print(round(dot_elapsed_time, 5))
+
+
 if __name__ == '__main__':
     main()
