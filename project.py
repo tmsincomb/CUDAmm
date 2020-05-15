@@ -177,7 +177,8 @@ class MatrixMultiplication:
             matrixA_mem_alloc,
             matrixB_mem_alloc,
             matrixC_mem_alloc,
-            block=(dim_block,dim_block,1),
+            # block=(dim_block,dim_block,1),
+            block=(height, width, 1)
             # grid=grid
         );
 
