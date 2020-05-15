@@ -55,9 +55,11 @@ class MatrixMultiplication:
             // Makes sure we don't spill over grid parameters
             if ((row > M) || (col > O)) return;
 
+            __syncthreads();
             for(int i=0; i < N; ++i)
                 tmp_value += A[row * N + i] * B[O * i + col];
-             __syncthreads();
+            __syncthreads();
+
             C[row * O + col] = tmp_value;
         }
     """
