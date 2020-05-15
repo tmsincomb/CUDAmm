@@ -148,16 +148,21 @@ class MatrixMultiplication:
         # print(self.matrixA)
         # print(self.matrixB)
         # print(self.matrixC)
-        dim_block_x = height
-        dim_block_y = width
-        dim_grid_x = 1
-        dim_grid_y = 1
-        if ((dim_block_x * dim_block_y) > 1024):
-            # Dynamic grid for none squared matrix multiplication
-            dim_block_x = 32
-            dim_block_y = 32
-            dim_grid_x = math.ceil((width) / dim_block_x)
-            dim_grid_y = math.ceil((height) / dim_block_y)
+        # dim_block_x = height
+        # dim_block_y = width
+        # dim_grid_x = 1
+        # dim_grid_y = 1
+        # if ((dim_block_x * dim_block_y) > 1024):
+        #     # Dynamic grid for none squared matrix multiplication
+        #     dim_block_x = 32
+        #     dim_block_y = 32
+        #     dim_grid_x = math.ceil((width) / dim_block_x)
+        #     dim_grid_y = math.ceil((height) / dim_block_y)
+
+        dim_block = 32
+
+        dim_grid_x = math.ceil((width) / dim_block)
+        dim_grid_y = math.ceil((height) / dim_block)
 
         # print(dim_grid_x)
         # print(dim_grid_y)
@@ -184,8 +189,8 @@ class MatrixMultiplication:
             matrixA_mem_alloc,
             matrixB_mem_alloc,
             matrixC_mem_alloc,
-            block=(dim_block_x,dim_block_y,1),
-            grid=(dim_grid_x, dim_grid_y)
+            block=(dim_block, dim_block, 1),
+            grid=(dim_grid_x, dim_grid_y),
         );
 
         # Copies completed dot product from GPU memory to normal memory
