@@ -57,31 +57,9 @@ class MatrixMultiplication:
 
             for(int i=0; i < N; ++i)
                 tmp_value += A[row * N + i] * B[O * i + col];
-
             C[row * O + col] = tmp_value;
         }
     """
-
-    # src_module = """
-    # __global__ void matmul(int n, const float *A, const float *B, float *C){
-    #
-    #   int tx = threadIdx.x;
-    #   int ty = threadIdx.y;
-    #
-    #   int bx = blockIdx.x;
-    #   int by = blockIdx.y;
-    #
-    #   int row = by*blockDim.y + ty;
-    #   int col = bx*blockDim.x + tx;
-    #
-    #   if(row < n && col < n){
-    #     float val = 0.0;
-    #     for(int i=0; i<n; ++i){
-    #       val += A[row*n + i]*B[n*i + col];
-    #     }
-    #     C[row*n + col] = val;
-    #   }
-    # }"""
 
     def __init__(self, matrixA, matrixB):
         self.matrixA = matrixA
@@ -126,7 +104,7 @@ class MatrixMultiplication:
         for row_start in range(0, M, batch_size):
             # poll(function, input list of inputs)
             # process = pool.map(_dot, batches)
-            process = Process(target=_dot, args=(row_start, batch_size, M, N, O, self.matrixA, self.matrixB))
+            process = Process(target=_dot, args=(row_start, batch_size, M, N, O, self.matrixA.copy(), self.matrixB.copy()))
             jobs.append(process)
 
         for job in jobs:
@@ -178,10 +156,10 @@ class MatrixMultiplication:
         # print(dim_grid_y)
 
         # Make sure grid is usable
-        if (width % dim_block != 0) and (height % dim_block != 0):
-            grid=(dim_grid_x+1, dim_grid_y+1, 1) # if matrix is smaller than block size
-        else:
-            grid=(dim_grid_x, dim_grid_y, 1)
+        # if (width % dim_block != 0) and (height % dim_block != 0):
+            # grid=(dim_grid_x+1, dim_grid_y+1, 1) # if matrix is smaller than block size
+        # else:
+        grid=(dim_grid_x, dim_grid_y, 1)
 
         # Call specific function from CUDA kernel
         dot_product = self.module.get_function("dot");
@@ -247,9 +225,9 @@ def main():
 
     print(dot)
     print(numpy_dot)
-    print(np.around(dot, decimals=5) == np.around(numpy_dot, decimals=5))
+    print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2))
     print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2)))
-    print(round(dot_elapsed_time, 5))
+    print(round(dot_elapsed_time, 2))
 
 
 if __name__ == '__main__':
