@@ -145,16 +145,16 @@ class MatrixMultiplication:
         cuda.memcpy_htod(matrixA_mem_alloc, self.matrixA)
         cuda.memcpy_htod(matrixB_mem_alloc, self.matrixB)
 
-        print(self.matrixA)
-        print(self.matrixB)
-        print(self.matrixC)
+        # print(self.matrixA)
+        # print(self.matrixB)
+        # print(self.matrixC)
 
         # Dynamic grid for none squared matrix multiplication
         dim_grid_x = math.ceil(width / dim_block)
         dim_grid_y = math.ceil(height / dim_block)
 
-        print(dim_grid_x)
-        print(dim_grid_y)
+        # print(dim_grid_x)
+        # print(dim_grid_y)
 
         # Make sure grid is usable
         if (width % dim_block != 0) and (height % dim_block != 0):
@@ -171,7 +171,7 @@ class MatrixMultiplication:
             np.int32(height),
             matrixA_mem_alloc,
             matrixB_mem_alloc,
-            matrixB_mem_alloc,
+            matrixC_mem_alloc,
             block=(dim_block,dim_block,1),
             grid=grid
         );
@@ -218,8 +218,8 @@ def main():
 
     # print(dot)
     # print(numpy_dot)
-    # print(np.around(dot, decimals=5) == np.around(numpy_dot, decimals=5))
-    print(np.array_equal(np.around(dot, decimals=5), np.around(numpy_dot, decimals=5)))
+    # print(np.around(dot, decimals=5) == np.around(numpy_dot.astype(np.float32), decimals=5))
+    print(np.array_equal(np.around(dot, decimals=5), np.around(numpy_dot.astype(np.float32), decimals=5)))
     print(round(dot_elapsed_time, 5))
 if __name__ == '__main__':
     main()
