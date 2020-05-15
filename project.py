@@ -186,6 +186,8 @@ class MatrixMultiplication:
         # Call specific function from CUDA kernel
         dot_product = self.module.get_function("dot");
 
+        print(dim_grid_x*dim_grid_y*(dim_block**2))
+
         # Dot product of matrixA with matrixB using GPU
         dot_product(
             np.int32(height),
