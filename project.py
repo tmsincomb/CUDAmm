@@ -57,6 +57,7 @@ class MatrixMultiplication:
 
             for(int i=0; i < N; ++i)
                 tmp_value += A[row * N + i] * B[O * i + col];
+             __syncthreads();
             C[row * O + col] = tmp_value;
         }
     """
