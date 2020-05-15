@@ -53,14 +53,12 @@ class MatrixMultiplication:
             float tmp_value = 0;
 
             // Makes sure we don't spill over grid parameters
-            if ((row > M) || (col > O)) return;
-
-            for(int i=0; i < N; ++i)
-                tmp_value += A[row * N + i] * B[O * i + col];
-
-            __syncthreads();
-
-            C[row * O + col] = tmp_value;
+            if ((row < M) && (col < O)) {
+                for(int i=0; i < N; ++i)
+                    tmp_value += A[row * N + i] * B[O * i + col];
+                __syncthreads();
+                C[row * O + col] = tmp_value;
+            }
         }
     """
 
