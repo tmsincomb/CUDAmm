@@ -189,7 +189,7 @@ class MatrixMultiplication:
         print(dim_grid_x*dim_grid_y)
         print(dim_block**2)
         print(dim_grid_x*dim_grid_y*(dim_block**2))
-        print(M*O)
+        print(height*width)
 
         # Dot product of matrixA with matrixB using GPU
         dot_product(
