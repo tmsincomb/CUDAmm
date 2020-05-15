@@ -159,7 +159,7 @@ class MatrixMultiplication:
         #     dim_grid_x = math.ceil((width) / dim_block_x)
         #     dim_grid_y = math.ceil((height) / dim_block_y)
 
-        dim_block = 2
+        dim_block = 32
 
         dim_grid_x = math.ceil((width) / dim_block)
         dim_grid_y = math.ceil((height) / dim_block)
@@ -168,10 +168,10 @@ class MatrixMultiplication:
         # print(dim_grid_y)
 
         # Make sure grid is usable
-        if (width % dim_block != 0) and (width > dim_block):
-            dim_grid_x += 1
-        if (height % dim_block != 0) and (height > dim_block):
-            dim_grid_y += 1
+        # if (width % dim_block != 0) and (width > dim_block):
+        #     dim_grid_x += 1
+        # if (height % dim_block != 0) and (height > dim_block):
+        #     dim_grid_y += 1
         grid=(dim_grid_x, dim_grid_y, 1)
 
         # Call specific function from CUDA kernel
