@@ -159,7 +159,7 @@ class MatrixMultiplication:
         #     dim_grid_x = math.ceil((width) / dim_block_x)
         #     dim_grid_y = math.ceil((height) / dim_block_y)
 
-        dim_block = 32
+        dim_block = 2
 
         dim_grid_x = math.ceil((width) / dim_block)
         dim_grid_y = math.ceil((height) / dim_block)
