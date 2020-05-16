@@ -187,7 +187,7 @@ class MatrixMultiplication:
 
 def main():
     args = docopt(__doc__) # grab command inputs into a dictionary
-    print(args)
+    # print(args)
 
     use_cuda = args['--CUDA']
     threads = int(args['--THREADS']) if args.get('--THREADS') else False
@@ -217,19 +217,19 @@ def main():
     dot_elapsed_time = time() - start
 
     # Numpy built-in matrix multiplication :: Sanity check
-    numpy_dot = matrixA.dot(matrixB)
+    # numpy_dot = matrixA.dot(matrixB)
     # Cuda needed float 32 for default. Best to compart with it.
-    if use_cuda: numpy_dot = numpy_dot.astype(np.float32)
+    # if use_cuda: numpy_dot = numpy_dot.astype(np.float32)
 
     # print(dot) # My matrix multipliation
     # print(numpy_dot) # Builti-in matrix multipliation
     # print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
 
     ### This one will be a false, false in large matrixes due to byte changes that add up. ###
-    print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
+    # print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
 
     # A_rows | Ac_olumns | B_columns | gpu_used | cpu_threads | time
-    print(f'{matrixA.shape[0]}\t{matrixA.shape[1]}\t{matrixB.shape[1]}\t{use_cuda}\t{threads}\t{round(dot_elapsed_time, 2)}') # Time for my dot product in seconds
+    print(f'{matrixA.shape[0]}\t{matrixA.shape[1]}\t{matrixB.shape[1]}\t{use_cuda}\t{threads}\t{round(dot_elapsed_time, 3)}') # Time for my dot product in seconds
 
 
 if __name__ == '__main__':
