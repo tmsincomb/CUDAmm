@@ -190,7 +190,7 @@ def main():
     print(args)
 
     use_cuda = args['--CUDA']
-    threads = int(args['--THREADS']) if args.get('--THREADS') else None
+    threads = int(args['--THREADS']) if args.get('--THREADS') else False
     M = int(args['M']) # matrixA rows
     N = int(args['N']) # matrixA cols & matrixB rows
     O = int(args['O']) # matrixB cols
@@ -221,9 +221,9 @@ def main():
     # Cuda needed float 32 for default. Best to compart with it.
     if use_cuda: numpy_dot = numpy_dot.astype(np.float32)
 
-    print(dot) # My matrix multipliation
-    print(numpy_dot) # Builti-in matrix multipliation
-    print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
+    # print(dot) # My matrix multipliation
+    # print(numpy_dot) # Builti-in matrix multipliation
+    # print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
 
     ### This one will be a false, false in large matrixes due to byte changes that add up. ###
     print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
