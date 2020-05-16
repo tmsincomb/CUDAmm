@@ -2,7 +2,7 @@
 #PBS -o /home/605/sincomb/project/times.txt
 #PBS -l nodes=node11
 #PBS -l walltime=10:00
-#PBS -N peng_please_use_forloop_no
+#PBS -N sincomb
 #PBS -j oe
 
 
