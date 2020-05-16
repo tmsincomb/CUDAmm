@@ -8,7 +8,7 @@ N will be the same since matrix multipliation isn't possible without it.
 Usage:
     ./project.py  (-h | --help)
     ./project.py  M N O
-    ./project.py  [--CUDA=<numeric_value> | --THREADS=<numeric_value>] M N O
+    ./project.py  [--CUDA | --THREADS=<numeric_value>] M N O
 
 Arguments:
     M                                Matrix A row count
@@ -17,11 +17,11 @@ Arguments:
 
 Options:
     -h, --help                       Prints out usage examples.
-    -c, --CUDA=<numeric_value>       Use GPU and assign block dimension
+    -c, --CUDA                       Use GPU with 16 x 16 block size
     -t, --THREADS=<numeric_value>    Number of threads
 
 Terminal Examples:
-    ./project.py -c 16  3 3 3        Square matrix multipliation with GPU of block size 16 x 16
+    ./project.py -c     3 3 3        Square matrix multipliation with GPU. Hardcoded block 16x16
     ./project.py -t 6   3 3 3        Square matrix multipliation with Multithreading of 6 threads
     ./project.py        4 3 7        Rectangular matrix multipliation (4 x 3) * (3 x 7)
 """
@@ -56,6 +56,7 @@ class MatrixMultiplication:
             if ((row < M) && (col < O)) {
                 for(int i=0; i < N; ++i)
                     tmp_value += A[row * N + i] * B[O * i + col];
+                // Makes sure threads are behaving. Random byte glitches WILL happen in giant matrixes.
                 __syncthreads();
                 C[row * O + col] = tmp_value;
             }
@@ -71,19 +72,29 @@ class MatrixMultiplication:
         return self.matrixA.dot(self.matrixB)
 
     def cpu_dot(self, threads:int=None):
+        """ Use allocated amount of threads to divide up the matrix rows for multipliation.
+
+        :param int threads: [default: None] # will auto to max the CPU will allow.
+        :returns: numpy matrix
+        """
 
         def _dot(row_start, batch_size, M, N, O, matrixA, matrixB):
+            """ Multiply Matrixes via batch & multithreading/processing """
+            # Chunch size; number of rows per thread
             row_end = row_start + batch_size
+            # Allocated memory for array accessed.
             matrixC = np.ctypeslib.as_array(shared_array)
+            # Populate resulting matrix by specific rows
             for i in range(row_start, row_end):
-                if i == M: break
+                # Don't want to continue if row max dimension hit
+                if i == M: break # Row end may exceed if batch not perfectly divisable.
                 for k in range(0, N):
                     for j in range(0, O):
                         matrixC[i][j] += matrixA[i][k] * matrixB[k][j]
 
         # Dimensions of the resulting matrix!
-        M, N = self.matrixA.shape
-        O = self.matrixB.shape[1]
+        M, N = self.matrixA.shape # (M x N)
+        O = self.matrixB.shape[1] # (N x O)
 
         # Create resulting dot matrix of (M x O) from (M x N)*(N * O)
         matrixC = np.zeros([M, O])
@@ -92,32 +103,29 @@ class MatrixMultiplication:
 
         # Python has a 1 GIL limit where you can only use 1 thread per core.
         # I.E 6 cores == 6 threads
-        # pool = ThreadPool(threads) # None defaults to use all the cores and 1 thread per core.
-        # pool = Pool(threads)
-
         batch_size = 1;
         if (M > threads):
             batch_size = math.ceil(M / threads)
-
-        # print(self.batch_size)
-
         jobs = []
         for row_start in range(0, M, batch_size):
-            # poll(function, input list of inputs)
-            # process = pool.map(_dot, batches)
-            process = Process(target=_dot, args=(row_start, batch_size, M, N, O, self.matrixA.copy(), self.matrixB.copy()))
+            process = Process(
+                target=_dot, # Function you want to use.
+                args=(row_start, batch_size,
+                      M, N, O,
+                      self.matrixA.copy(), self.matrixB.copy()))
+            # Add next process job
             jobs.append(process)
 
+        # Signals to close for multithreaded backend to be ready for finishing what's left.
         for job in jobs:
             job.start()
+        # Wait for the pool to be done.
         for jon in jobs:
             job.join()
 
+        # Pull shared matrix address amongst the cores/threads/processes
         matrixC = np.ctypeslib.as_array(shared_array)
-        # Signals to close for multithreaded backend to be ready for finishing what's left.
-        # pool.close()
-        # # Wait for the pool to be done.
-        # pool.join()
+
         return matrixC
 
     @property
@@ -146,42 +154,18 @@ class MatrixMultiplication:
         cuda.memcpy_htod(matrixA_mem_alloc, self.matrixA)
         cuda.memcpy_htod(matrixB_mem_alloc, self.matrixB)
 
+        # DEBUG
         # print(self.matrixA)
         # print(self.matrixB)
         # print(self.matrixC)
-        # dim_block_x = height
-        # dim_block_y = width
-        # dim_grid_x = 1
-        # dim_grid_y = 1
-        # if ((dim_block_x * dim_block_y) > 1024):
-        #     # Dynamic grid for none squared matrix multiplication
-        #     dim_block_x = 32
-        #     dim_block_y = 32
-        #     dim_grid_x = math.ceil((width) / dim_block_x)
-        #     dim_grid_y = math.ceil((height) / dim_block_y)
 
-        dim_block = 16
+        dim_block = 16 # Stable block size for tuckoo
 
         dim_grid_x = math.ceil((width) / dim_block)
         dim_grid_y = math.ceil((height) / dim_block)
 
-        # print(dim_grid_x)
-        # print(dim_grid_y)
-
-        # Make sure grid is usable
-        # if (width % dim_block != 0) and (width > dim_block):
-        #     dim_grid_x += 1
-        # if (height % dim_block != 0) and (height > dim_block):
-        #     dim_grid_y += 1
-        grid=(dim_grid_x, dim_grid_y, 1)
-
         # Call specific function from CUDA kernel
         dot_product = self.module.get_function("dot");
-
-        # print(dim_grid_x*dim_grid_y)
-        # print(dim_block**2)
-        # print(dim_grid_x*dim_grid_y*(dim_block**2))
-        # print(height*width)
 
         # Dot product of matrixA with matrixB using GPU
         dot_product(
@@ -221,11 +205,11 @@ def main():
     start = time()
     ### GPU ###
     if dim_block:
-        print('GPU!')
+        # print('GPU!')
         dot = mm.gpu_dot # GPU multithreaded matrix multipliation
     ### CPU ###
     elif threads:
-        print('THREAD!')
+        # print('THREAD!')
         dot = mm.cpu_dot(threads=threads) # CPU multithreaded matrix multipliation
     else:
         # Numpy built-in matrix multiplication
@@ -234,14 +218,17 @@ def main():
 
     # Numpy built-in matrix multiplication :: Sanity check
     numpy_dot = matrixA.dot(matrixB)
-    if dim_block:
-        numpy_dot = numpy_dot.astype(np.float32)
+    # if dim_block:
+    #     numpy_dot = numpy_dot.astype(np.float32)
 
-    print(dot)
-    print(numpy_dot)
-    print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2))
-    print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2)))
-    print(round(dot_elapsed_time, 2))
+    # print(dot) # My matrix multipliation
+    # print(numpy_dot) # Builti-in matrix multipliation
+    # print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
+
+    ### This one will be a false, false in large matrixes due to byte changes that add up. ###
+    print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
+
+    print(round(dot_elapsed_time, 2)) # Time for my dot product in seconds
 
 
 if __name__ == '__main__':
