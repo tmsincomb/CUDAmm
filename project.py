@@ -189,7 +189,7 @@ def main():
     args = docopt(__doc__) # grab command inputs into a dictionary
     print(args)
 
-    dim_block = int(args['--CUDA']) if args.get('--CUDA') else None
+    use_cuda = args['--CUDA']
     threads = int(args['--THREADS']) if args.get('--THREADS') else None
     M = int(args['M']) # matrixA rows
     N = int(args['N']) # matrixA cols & matrixB rows
@@ -204,7 +204,7 @@ def main():
 
     start = time()
     ### GPU ###
-    if dim_block:
+    if use_cuda:
         # print('GPU!')
         dot = mm.gpu_dot # GPU multithreaded matrix multipliation
     ### CPU ###
@@ -228,7 +228,8 @@ def main():
     ### This one will be a false, false in large matrixes due to byte changes that add up. ###
     print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
 
-    print(round(dot_elapsed_time, 2)) # Time for my dot product in seconds
+    # A_rows | Ac_olumns | B_columns | gpu_used | cpu_threads | time
+    print(f'{matrixA.shape[0]}\t{matrixA.shape[1]}\t{matrixB.shape[1]}\t{use_cuda}\t{threads}\t{round(dot_elapsed_time, 2)}') # Time for my dot product in seconds
 
 
 if __name__ == '__main__':
