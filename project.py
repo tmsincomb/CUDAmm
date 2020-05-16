@@ -33,12 +33,6 @@ import numpy as np # Linear alg library
 from multiprocessing.dummy import Pool as ThreadPool # dynamic multithreading
 from multiprocessing import Process, sharedctypes
 import pandas as pd # Matrix processing
-try:
-    import pycuda.driver as cuda # Access GPU specifics
-    import pycuda.autoinit # Automatically inits backend GPU stuffs for you
-    from pycuda.compiler import SourceModule # Complie cuda kernels
-except:
-    print('WARNING :: You need an NVIDIA GPU for this to work!')
 
 
 class MatrixMultiplication:
@@ -129,7 +123,14 @@ class MatrixMultiplication:
         return matrixC
 
     @property
-    def gpu_dot(self):#, dim_block:int=16):
+    def gpu_dot(self):
+        try:
+            import pycuda.driver as cuda # Access GPU specifics
+            import pycuda.autoinit # Automatically inits backend GPU stuffs for you
+            from pycuda.compiler import SourceModule # Complie cuda kernels
+        except:
+            print('WARNING :: You need an NVIDIA GPU for this to work!')
+
         # Initialize gpu CUDA kernels
         self.module = SourceModule(self.src_module)
 
