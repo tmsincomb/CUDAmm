@@ -7,7 +7,7 @@
 
 
 echo -e "A_rows\tA_columns\tB_columns\tgpu_used\tcpu_threads\ttime"
-for i in {250 500 750 1000}
+for i in {25..500..25}
 do
     /home/605/sincomb/project/./project.py -c $i $i $i
     for threads in {1..32}
