@@ -1,13 +1,13 @@
 #!/bin/bash
 #PBS -o /home/605/sincomb/project/times.txt
-#PBS -l nodes=node10
+#PBS -l nodes=node11
 #PBS -l walltime=10:00
-#PBS -N sincomb
+#PBS -N peng_please_use_forloop_no
 #PBS -j oe
 
 
 echo -e "A_rows\tA_columns\tB_columns\tgpu_used\tcpu_threads\ttime"
-for i in {10..32}
+for i in {250 500 750 1000}
 do
     /home/605/sincomb/project/./project.py -c $i $i $i
     for threads in {1..32}
