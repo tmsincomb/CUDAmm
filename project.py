@@ -222,7 +222,7 @@ def main():
     # Cuda needed float 32 for default. Best to compart with it.
     # if use_cuda: numpy_dot = numpy_dot.astype(np.float32)
 
-    print(dot) # My matrix multipliation
+    # print(dot) # My matrix multipliation
     # print(numpy_dot) # Builti-in matrix multipliation
     # print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
 
