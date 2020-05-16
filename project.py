@@ -221,9 +221,9 @@ def main():
     # if dim_block:
     #     numpy_dot = numpy_dot.astype(np.float32)
 
-    # print(dot) # My matrix multipliation
-    # print(numpy_dot) # Builti-in matrix multipliation
-    # print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
+    print(dot) # My matrix multipliation
+    print(numpy_dot) # Builti-in matrix multipliation
+    print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
 
     ### This one will be a false, false in large matrixes due to byte changes that add up. ###
     print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
