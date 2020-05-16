@@ -13,4 +13,5 @@ do
     for threads in {1..32}
     do
         /home/605/sincomb/project/./project.py -t $threads $i $i $i
+    done
 done
