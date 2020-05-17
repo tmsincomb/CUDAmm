@@ -238,7 +238,8 @@ def main():
         print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
         ## This one will be a false, false in large matrixes due to byte changes that add up. ###
         print('Is the dot product correct? ->', np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
-
+        print('A_rows\tA_columns\tB_columns\tgpu_used\tcpu_threads\ttime')
+        
     # A_rows | Ac_olumns | B_columns | gpu_used | cpu_threads | time
     print(f'{matrixA.shape[0]}\t{matrixA.shape[1]}\t{matrixB.shape[1]}\t{use_cuda}\t{threads}\t{round(dot_elapsed_time, 3)}') # Time for my dot product in seconds
 
