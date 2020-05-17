@@ -8,7 +8,7 @@ N will be the same since matrix multipliation isn't possible without it.
 Usage:
     ./project.py  (-h | --help)
     ./project.py  M N O
-    ./project.py  [--CUDA | --THREADS=<numeric_value>] M N O
+    ./project.py  [--CUDA | --THREADS=<numeric_value>] [--DEBUG] M N O
 
 Arguments:
     M                                Matrix A row count
@@ -19,11 +19,19 @@ Options:
     -h, --help                       Prints out usage examples.
     -c, --CUDA                       Use GPU with 16 x 16 block size
     -t, --THREADS=<numeric_value>    Number of threads
+    -d, --DEBUG                      Debug mode that prints out matrices
 
 Terminal Examples:
-    ./project.py -c     3 3 3        Square matrix multipliation with GPU. Hardcoded block 16x16
-    ./project.py -t 6   3 3 3        Square matrix multipliation with Multithreading of 6 threads
-    ./project.py        4 3 7        Rectangular matrix multipliation (4 x 3) * (3 x 7)
+    ./project.py --CUDA 3 3 3                Square matrix multipliation with GPU. Hardcoded block 16x16
+    ./project.py -c 3 3 3                    Square matrix multipliation with GPU. Hardcoded block 16x16
+
+    ./project.py --THREADS=6 3 3 3           Square matrix multipliation with Multithreading of 6 threads
+    ./project.py -t 6 3 3 3                  Square matrix multipliation with Multithreading of 6 threads
+
+    ./project.py 4 3 7                       Single thread Rectangular matrix multipliation (4 x 3) * (3 x 7)
+
+    ./project.py --DEBUG --THREADS=6 4 3 7   Print out of matrix and checks
+    ./project.py -d -t 6 4 3 7               Print out of matrix and checks
 """
 import math # Built-in Math library
 from time import time # Built-in time keeping library
@@ -217,17 +225,19 @@ def main():
         dot = mm.dot
     dot_elapsed_time = time() - start
 
-    # Numpy built-in matrix multiplication :: Sanity check
-    # numpy_dot = matrixA.dot(matrixB)
-    # Cuda needed float 32 for default. Best to compart with it.
-    # if use_cuda: numpy_dot = numpy_dot.astype(np.float32)
-
-    # print(dot) # My matrix multipliation
-    # print(numpy_dot) # Builti-in matrix multipliation
-    # print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
-
-    ### This one will be a false, false in large matrixes due to byte changes that add up. ###
-    # print(np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
+    if args['--DEBUG']:
+        # Numpy built-in matrix multiplication :: Sanity check
+        numpy_dot = matrixA.dot(matrixB)
+        # Cuda needed float 32 for default. Best to compart with it.
+        if use_cuda: numpy_dot = numpy_dot.astype(np.float32)
+        print('='*10, 'MY DOT PRODUCT', '='*10)
+        print(dot) # My matrix multipliation
+        print('='*10, 'BUILT-IN DOT PRODUCT')
+        print(numpy_dot) # Builti-in matrix multipliation
+        print('PRINT OUT OF SINGLE ELEMENT MATCHING')
+        print(np.around(dot, decimals=2) == np.around(numpy_dot, decimals=2)) # Check individual cells for correctness
+        ## This one will be a false, false in large matrixes due to byte changes that add up. ###
+        print('', np.array_equal(np.around(dot, decimals=2), np.around(numpy_dot, decimals=2))) #
 
     # A_rows | Ac_olumns | B_columns | gpu_used | cpu_threads | time
     print(f'{matrixA.shape[0]}\t{matrixA.shape[1]}\t{matrixB.shape[1]}\t{use_cuda}\t{threads}\t{round(dot_elapsed_time, 3)}') # Time for my dot product in seconds
